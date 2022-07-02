@@ -1,0 +1,50 @@
+http:
+  port: ${HTTP_PORT:-5010}
+admin:
+  port: ${HTTP_PORT:-9876}
+  host: localhost
+apiEndpoints:
+  api:
+    host: '*'
+    paths: '/api'
+  api-gateway:
+    host: '*'
+    paths: ['/gateway','/lock']
+  api-web:
+    host: '*'
+    paths: ['/web','*']    
+
+serviceEndpoints:
+  arteswebapi:
+    url: 'http://www.trendyol.com'
+  artesgtw:
+    url: 'artes-gateway-client'
+  artesweb:
+    url: 'http://srv341.heyloki.com:8000'
+# https://www.express-gateway.io/docs/policies/proxy/
+policies:
+  - proxy
+pipelines:
+  api-pipe:
+    apiEndpoints:
+      - api
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: arteswebapi
+  pipelines-web:
+    apiEndpoints:
+      - api-web
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: artesweb            
+  pipelines-test:
+    apiEndpoints:
+      - api-gateway
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: artesgtw
+              # ignorePath: true
+              # prependPath: true
